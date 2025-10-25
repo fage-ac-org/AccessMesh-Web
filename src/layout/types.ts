@@ -50,6 +50,7 @@ export interface setType {
     isClickCollapse: boolean;
   };
   device: string;
+  /** 固定头 */
   fixedHeader: boolean;
   classes: {
     hideSidebar: boolean;
