@@ -15,12 +15,12 @@ defineOptions({
   name: "SystemOrganization"
 });
 
-// 查询表单
+// 查询表单（支持多选）
 const queryForm = reactive({
   name: "",
   code: "",
-  type: "",
-  status: ""
+  type: [] as string[],
+  status: [] as number[]
 });
 
 // 表格数据
@@ -32,7 +32,7 @@ const editingId = ref<number | null>(null);
 const dialogVisible = ref(false);
 const formRef = ref<FormInstance>();
 
-// 表单数据
+// 表单数据（支持多选）
 const form = reactive<OrganizationForm>({
   parentId: null,
   name: "",
@@ -66,11 +66,6 @@ const statusOptions = [
   { label: "启用", value: 1 }
 ];
 
-// 扁平化组织数据（用于查找编辑时的 ID）
-const flattenOrgs = (data: Organization[]): Organization[] => {
-  return data.flatMap(item => [item, ...flattenOrgs(item.children || [])]);
-};
-
 // 加载数据
 const loadData = async () => {
   loading.value = true;
@@ -90,8 +85,8 @@ const loadData = async () => {
 const resetQuery = () => {
   queryForm.name = "";
   queryForm.code = "";
-  queryForm.type = "";
-  queryForm.status = "";
+  queryForm.type = [];
+  queryForm.status = [];
   loadData();
 };
 
@@ -217,7 +212,15 @@ loadData();
           />
         </el-form-item>
         <el-form-item label="组织类型">
-          <el-select v-model="queryForm.type" placeholder="请选择" clearable>
+          <el-select
+            v-model="queryForm.type"
+            placeholder="请选择"
+            clearable
+            multiple
+            collapse-tags
+            collapse-tags-tooltip
+            class="w-50"
+          >
             <el-option
               v-for="item in typeOptions"
               :key="item.value"
@@ -227,7 +230,15 @@ loadData();
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="queryForm.status" placeholder="请选择" clearable>
+          <el-select
+            v-model="queryForm.status"
+            placeholder="请选择"
+            clearable
+            multiple
+            collapse-tags
+            collapse-tags-tooltip
+            class="w-50"
+          >
             <el-option
               v-for="item in statusOptions"
               :key="item.value"
@@ -350,7 +361,7 @@ loadData();
             check-strictly
             placeholder="请选择上级组织（不选则为顶级）"
             clearable
-            style="width: 100%"
+            class="w-full"
           />
         </el-form-item>
         <el-form-item label="组织名称" prop="name">
@@ -360,15 +371,22 @@ loadData();
           <el-input v-model="form.code" placeholder="请输入组织编码" />
         </el-form-item>
         <el-form-item label="组织类型" prop="type">
-          <el-radio-group v-model="form.type">
-            <el-radio
+          <el-select
+            v-model="form.type"
+            placeholder="请选择"
+            clearable
+            multiple
+            collapse-tags
+            collapse-tags-tooltip
+            class="w-full"
+          >
+            <el-option
               v-for="item in typeOptions"
               :key="item.value"
-              :label="item.value"
-            >
-              {{ item.label }}
-            </el-radio>
-          </el-radio-group>
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="排序">
           <el-input-number
@@ -387,11 +405,23 @@ loadData();
         <el-form-item label="邮箱">
           <el-input v-model="form.email" placeholder="请输入邮箱" />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-radio-group v-model="form.status">
-            <el-radio :label="1">启用</el-radio>
-            <el-radio :label="0">禁用</el-radio>
-          </el-radio-group>
+        <el-form-item label="状态" prop="status">
+          <el-select
+            v-model="form.status"
+            placeholder="请选择"
+            clearable
+            multiple
+            collapse-tags
+            collapse-tags-tooltip
+            class="w-full"
+          >
+            <el-option
+              v-for="item in statusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="备注">
           <el-input
